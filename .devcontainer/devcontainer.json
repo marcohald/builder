@@ -1,6 +1,6 @@
 {
   "name": "Alpine",
-  "image": "mcr.microsoft.com/vscode/devcontainers/base:0-alpine-3.20",
+  "image": "ghcr.io/hassio-addons/debian-base/amd64:7.6.0",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/ash",
     "shellcheck.enable": true,
