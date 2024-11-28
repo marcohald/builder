@@ -50,6 +50,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          logout: false
 
       - name: Publish ${{ matrix.architecture }} builder
         uses: home-assistant/builder@2024.08.2
