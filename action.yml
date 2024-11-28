@@ -25,7 +25,7 @@ runs:
     - shell: bash
       id: builder
       run: |
-        builder=$(docker images ghcr.io/home-assistant/amd64-builder:${{ steps.version.outputs.version }} -q)
+        builder=$(docker images ghcr.io/marcohald/amd64-builder:${{ steps.version.outputs.version }} -q)
         echo "id=$builder" >> "$GITHUB_OUTPUT"
 
     - shell: bash
@@ -39,7 +39,7 @@ runs:
             -v ~/.docker:/root/.docker \
             -v ${{ github.workspace }}:/data \
             --env-file "${{ github.action_path }}/env_file" \
-            ghcr.io/home-assistant/amd64-builder:${{ steps.version.outputs.version }} \
+            ghcr.io/marcohald/amd64-builder:${{ steps.version.outputs.version }} \
             ${{ inputs.args }}
 
     - shell: bash
