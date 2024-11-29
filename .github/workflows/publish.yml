@@ -53,7 +53,7 @@ jobs:
           logout: false
 
       - name: Publish ${{ matrix.architecture }} builder
-        uses: marcohald/builder@2024.11.8
+        uses: marcohald/builder@2024.11.12
         with:
           args: |
             --${{ matrix.architecture }} \
