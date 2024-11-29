@@ -995,7 +995,14 @@ copy_config_tmp
 
 # Login into dockerhub
 if [ -n "$DOCKER_USER" ] && [ -n "$DOCKER_PASSWORD" ]; then
-  docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" ghcr.io
+    dockerregistry=""
+    if bashio::var.has_value "${IMAGE}"; then 
+        image="${IMAGE@L}"
+        if [[ "$(echo "$image" | grep -o '/' | wc -l)" -gt 1 ]]; then
+            dockerregistry="${image%%/*}"
+        fi
+    fi
+  docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" $dockerregistry
 fi
 
 # Select arch build
