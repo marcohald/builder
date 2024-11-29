@@ -209,7 +209,7 @@ function stop_docker() {
 
 function run_build() {
     local build_dir=$1
-    local repository="marcohald"
+    local repository=$2
     local image=$3
     local version=$4
     local build_from=$5
@@ -383,9 +383,16 @@ function run_build() {
         for i in "${push_images[@]}"; do
             for j in {1..3}; do
                 bashio::log.info "Start upload of ${i} (attempt #${j}/3)"
-                if docker push "${i}"; then
-                    bashio::log.info "Upload succeeded on attempt #${j}"
-                    break
+                if [[ "${j}" == "3" ]]; then
+                    if docker push "${i}"; then
+                        bashio::log.info "Upload succeeded on attempt #${j}"
+                        break
+                    fi
+                else
+                    if docker push "${i}" > /dev/null 2>&1; then
+                        bashio::log.info "Upload succeeded on attempt #${j}"
+                        break
+                    fi
                 fi
                 if [[ "${j}" == "3" ]]; then
                     bashio::exit.nok "Upload failed on attempt #${j}"
@@ -475,7 +482,7 @@ function build_base() {
         bashio::log.error "Can't find the image tag on build.json"
         return 1
     fi
-    #repository="${raw_image%/*}"
+    repository="${raw_image%/*}"
     image="${raw_image##*/}"
 
     # Additional build args
@@ -579,7 +586,7 @@ function build_addon() {
 
     # Read data from image
     if [ -n "$raw_image" ]; then
-        #repository="${raw_image%/*}"
+        repository="${raw_image%/*}"
         image="${raw_image##*/}"
     fi
 
@@ -633,7 +640,7 @@ function build_generic() {
         bashio::log.error "Can't find the image tag on build.json"
         return 1
     fi
-    #repository="${raw_image%/*}"
+    repository="${raw_image%/*}"
     image="${raw_image##*/}"
 
     # Additional build args
@@ -694,7 +701,7 @@ function build_machine() {
         docker_cli+=("--file" "${TARGET}/${build_machine}")
     fi
 
-    #repository="${raw_image%/*}"
+    repository="${raw_image%/*}"
     image="${raw_image##*/}"
 
     # Replace {machine} with build machine for image
@@ -808,23 +815,23 @@ function cosign_verify() {
         docker pull "${image}" --platform "${platform}" > /dev/null 2>&1 || bashio::exit.nok "Can't pull image ${image}"
     fi
 
-#     # validate image
-#     for j in {1..6}; do
-#         if cosign verify --certificate-oidc-issuer-regexp "${issuer}" --certificate-identity-regexp "${identity}" "${image}"; then
-#             success=true
-#             break
-#         fi
-#         sleep $((5 * j))
-#     done
+    # validate image
+    for j in {1..6}; do
+        if cosign verify --certificate-oidc-issuer-regexp "${issuer}" --certificate-identity-regexp "${identity}" "${image}"; then
+            success=true
+            break
+        fi
+        sleep $((5 * j))
+    done
 
-#     if bashio::var.false "${success}"; then
-#         bashio::log.warning "Validation of ${image} fails with cosign!"
-#         if bashio::var.true "${pull}"; then
-#             docker rmi "${image}" > /dev/null 2>&1 || true
-#         fi
-#         return 1
-#     fi
-#     bashio::log.info "Image ${image} is trusted by cosign"
+    if bashio::var.false "${success}"; then
+        bashio::log.warning "Validation of ${image} fails with cosign!"
+        if bashio::var.true "${pull}"; then
+            docker rmi "${image}" > /dev/null 2>&1 || true
+        fi
+        return 1
+    fi
+    bashio::log.info "Image ${image} is trusted by cosign"
 }
 
 
