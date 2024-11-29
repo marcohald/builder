@@ -49,7 +49,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DOCKER_GITHUB_TOKEN }}
           logout: false
 
       - name: Publish ${{ matrix.architecture }} builder
@@ -57,5 +57,7 @@ jobs:
         with:
           args: |
             --${{ matrix.architecture }} \
+            --docker-user ${{ github.repository_owner }} \
+            --docker-password ${{ secrets.DOCKER_GITHUB_TOKEN }} \
             --target /data \
             --generic $GIT_TAG_NAME
